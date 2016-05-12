@@ -1,6 +1,14 @@
 #Manners
 Tools for using ExpressionEngine image file manipulations with responsive images in the templates.
 
+##Installation
+
+###EE2
+1. Download and unzip the package directory into /system/expressionengine/third_party/manners
+
+###EE3
+1. Download and unzip the package directory into /system/user/addons/manners
+2. If you're using EE3, install the plugin in CP > Add-ons Manager
 
 ##Usage: Tag Pairs
 

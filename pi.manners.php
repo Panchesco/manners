@@ -8,9 +8,19 @@
  * @copyright		Copyright (c) 2016, Richard Whitmer
  * @link 			https://github.com/panchesco/manners
  * @license 		MIT
- * @version 		1.1.0
+ * @version 		1.2.0
  * @filesource		manners/pi.manners.php
  */
+ 
+ 
+	 $plugin_info = array(
+	    'pi_name'         => 'Manners',
+	    'pi_version'      => '1.2.0',
+	    'pi_author'       => 'Richard Whitmer',
+	    'pi_author_url'   => 'https://github.com/panchesco/manners',
+	    'pi_description'  => 'Tools for using ExpressionEngine image file manipulations with responsive images in the templates.',
+	    'pi_usage'        => Manners::usage()
+	);
 
  
 	class Manners {
@@ -265,6 +275,32 @@
 						return $query->row()->file_id;
 					}
 				
+			}
+				
+			//-----------------------------------------------------------------------------
+			
+			/**
+			 * Usage
+			 *
+			 * This function describes how the plugin is used.
+			 *
+			 * @access  public
+			 * @return  string
+			 */
+			public static function usage()
+			{
+			    ob_start();  ?>
+			
+			Tools for using ExpressionEngine image file 
+			manipulations with responsive images in the templates.
+			
+			https://github.com/panchesco/manners
+			
+			<?php
+			    $buffer = ob_get_contents();
+			    ob_end_clean();
+			
+			    return $buffer;
 			}
 				
 			//-----------------------------------------------------------------------------
