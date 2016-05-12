@@ -1,5 +1,5 @@
 #Manners
-Tools for using ExpressionEngine image file manipulations with responsive images in the templates.
+Tools for using ExpressionEngine image image manipulations with responsive images in the templates.
 
 ##Installation
 
@@ -13,7 +13,7 @@ Tools for using ExpressionEngine image file manipulations with responsive images
 ##Usage: Tag Pairs
 
 ###{exp:manners:srcset_wrap}
-Add srcset string of image file manipulations to img tags wrapped in this tag pair.
+Add srcset string of image image manipulations to img tags wrapped in this tag pair.
 
 <figure>
 	<img src="http://panchesco.com/media/image-manipulations.png" alt="Screenshot of the File Manager /Edit Upload area">
@@ -24,9 +24,9 @@ Add srcset string of image file manipulations to img tags wrapped in this tag pa
 
 | Parameter | Required? |	Description | Default | Options
 | --- | --- | --- | --- | --- |
-| directory_id | See notes | ID of directory to look for file manipulations in | | |
-| directory_name | See notes | Name of directory to look for file manipulations in | | |
-| short_names | No	| Pipe delimited list of short names of file manipulations <br>to include in the returned srcset |  |	|
+| directory_id | See notes | ID of directory to look for image manipulations in | | |
+| directory_name | See notes | Name of directory to look for image manipulations in | | |
+| short_names | No	| Pipe delimited list of short names of image manipulations <br>to include in the returned srcset |  |	|
 | break_lines | No	| Break returned srcset string into lines? | y | y, n	|
 
 ###Notes
@@ -59,7 +59,7 @@ Add a srcset to the img tags in a block of template content.
 ##Usage: Single Tags
 
 ###{exp:manners:srcset}
-Add a srcset string of file manipulations to img tags wrapped in this tag.
+Add a srcset string of image manipulations to img tags wrapped in this tag.
 
 
 ####Parameters
@@ -67,7 +67,7 @@ Add a srcset string of file manipulations to img tags wrapped in this tag.
 | Parameter | Required? |	Description | Default | Options
 | --- | --- | --- | --- | --- |
 | file_id | Yes | file_id to return manipulations for | | |
-| short_names | No	| Pipe delimited list of short names of file manipulations <br>to include in the returned srcset |  |	|
+| short_names | No	| Pipe delimited list of short names of image manipulations <br>to include in the returned srcset |  |	|
 | break_lines | No	| Break returned srcset string into lines? | y | y, n	|
 
 #####Example
