@@ -8,7 +8,7 @@
  * @copyright		Copyright (c) 2016, Richard Whitmer
  * @link 			https://github.com/panchesco/manners
  * @license 		MIT
- * @version 		1.0.0
+ * @version 		1.1.0
  * @filesource		manners/pi.manners.php
  */
 
@@ -17,7 +17,14 @@
 		
 		var $short_names	= array();
 		
-		function __construct(){}
+		function __construct(){
+			
+			$this->short_names = explode("|",ee()->TMPL->fetch_param('short_names'));
+			 
+			 // Break lines in returned srcset?
+			 $break_lines	= ee()->TMPL->fetch_param('break_lines','y');
+			 $this->break_lines	= str_ireplace(array('yes','y','on','true'),'y',$break_lines);
+		}
 		
 		//-----------------------------------------------------------------------------
 		
@@ -30,15 +37,11 @@
 		 {
 			 $srcset 			= '';
 			 $file_id			= ee()->TMPL->fetch_param('file_id');
-			 $this->short_names = explode("|",ee()->TMPL->fetch_param('short_names'));
 			 
-			 // Break lines in returned srcset?
-			 $break_lines	= ee()->TMPL->fetch_param('break_lines','y');
-			 $break_lines	= str_ireplace(array('yes','y','on','true'),'y',$break_lines);
 			 
 			$rows = $this->srcset_array($file_id);
 			
-			if($break_lines=='y')
+			if($this->break_lines=='y')
 			{
 				$srcset = implode(", \n",$rows);
 			} else {
@@ -125,5 +128,146 @@
 		  }
 		  
 		 //-----------------------------------------------------------------------------
+		 
+			/**
+			 * 
+			 *
+			*/
+			public function srcset_bulk() 
+			{
+				
+				$directory_name	= ee()->TMPL->fetch_param('directory_name');
+				$directory_id		= ee()->TMPL->fetch_param('directory_id');
+				
+				$str = '';
+				$img_lines = array();
+				
+				$tagdata = str_replace("\r","\n",ee()->TMPL->tagdata);
+				
+				// Get the upload directory info.
+				
+				if($directory_id)
+				{
+					ee()->db->where('id',$directory_id);
+					
+				} elseif($directory_name){
+					
+					ee()->db->where('name',$directory_name);
+					
+				} else {
+					
+					return $tagdata;
+				}
+				
+				ee()->db->limit(1);
+				$query = ee()->db->get('upload_prefs');
+
+				// If no directory found, return the tagdata and be done with it.
+				
+				if($query->num_rows()==0)
+				{
+					return $tagdata;
+					
+					} else {
+					
+					$dir = $query->row(); 
+	
+				}
+				
+				
+				// Convert tagdata to array
+				$lines = explode("\n",$tagdata);
+				
+				
+				// Loop through array and create new array of lines with img tags.
+				foreach($lines as $key => $string)
+				{
+					$img = strpos($string, $dir->url);
+					
+					if($img>0)
+					{
+						$img_lines[] = $key;	
+					}
+				}
+				
+				// Now loop through the lines with images.
+				foreach($img_lines as $key)
+				{
+					// Get the src value.
+					
+					$src = $lines[$key];
+					
+					
+					$match = preg_match("/\/[[:alnum:]-_]+\.(png|jpe?g){1}/i", $lines[$key],$result);
+					
+					if(isset($result[0]))
+					{
+						$file_name = trim($result[0],'/');
+						
+						// We have the directory_id and filename.
+						// We can get the file_id.
+						
+						$file_id = $this->file_id($dir->id,$file_name);
+						
+						
+						// Now that we have the file_id, we can get the srcset string 
+						
+						if($file_id)
+						{
+							$srcset = $this->srcset_array($file_id);
+							
+							if($this->break_lines=='y')
+							{
+								$srcset = implode(", \n",$srcset);
+							} else {
+								$srcset = implode(", ",$srcset);
+							}
+							
+							// Now add the srcset string to the img tag.
+							$lines[$key] = str_replace('<img ','<img srcset="' . $srcset . '" ',$lines[$key]);
+
+						}
+	
+					}
+					
+				}
+				
+				// Now loop through the lines and rebuild the tagdata.
+				
+				foreach($lines as $row)
+				{
+					$str.= $row . "\n";
+				}
+				
+				return $str;	
+			}
+				
+			//-----------------------------------------------------------------------------
+			
+			
+			/**
+			 * Get the file id.
+			 * @param $directory_id integer
+			 * @param $file_name integer
+			 * @return mixed integer/bool
+			*/
+			private function file_id($directory_id,$file_name) 
+			{
+					ee()->db->select('file_id');
+					ee()->db->where('upload_location_id',$directory_id);
+					ee()->db->where('file_name',$file_name);
+					ee()->db->limit(1);
+					$query = ee()->db->get('files');
+					
+					if($query->num_rows()==0)
+					{
+						return FALSE;
+					} else {
+						return $query->row()->file_id;
+					}
+				
+			}
+				
+			//-----------------------------------------------------------------------------
 
 	}
