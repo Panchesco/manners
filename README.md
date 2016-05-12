@@ -1,5 +1,5 @@
 #Manners
-Tools for using ExpressionEngine image image manipulations with responsive images in the templates.
+Tools for using ExpressionEngine image manipulations with responsive images in the templates.
 
 ##Installation
 
