@@ -37,8 +37,7 @@
 		 {
 			 $srcset 			= '';
 			 $file_id			= ee()->TMPL->fetch_param('file_id');
-			 
-			 
+
 			$rows = $this->srcset_array($file_id);
 			
 			if($this->break_lines=='y')
@@ -133,7 +132,7 @@
 			 * 
 			 *
 			*/
-			public function srcset_bulk() 
+			public function srcset_wrap() 
 			{
 				
 				$directory_name	= ee()->TMPL->fetch_param('directory_name');

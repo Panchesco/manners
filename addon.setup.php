@@ -18,6 +18,6 @@ return array(
       'author_url'  => 'https://github.com/panchesco',
       'name'        => 'Manners',
       'description' => 'Tools for using ExpressionEngine image file manipulations with responsive images in the templates.',
-      'version'     => '1.0.0',
+      'version'     => '1.1.0',
       'namespace'   => '\Panchesco\Addons\Manners',
 );

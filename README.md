@@ -3,8 +3,8 @@ Tools for using ExpressionEngine image file manipulations with responsive images
 
 ##Usage: Tag Pairs
 
-###{exp:manners:srcset_bulk}
-Return a srcset string of a file's URL and width via the Consrain or Crop widths in an upload directory.
+###{exp:manners:srcset_wrap}
+Add srcset string of image file manipulations to img tags wrapped in this tag pair.
 
 
 ####Parameters
@@ -21,23 +21,23 @@ Return a srcset string of a file's URL and width via the Consrain or Crop widths
 For srcset to be applied, either a valid directory_id or directory_name parameter must be present.
 
 
-#####Examples
+#####Example
 
-Add srcset to an img tag in a template outputting an image file from a custom field.
+Add a srcset to the img tags in a block of template content.
 
-* In your template HTML, wrap a block you want the srcset attribute added to img tags
+* In your template HTML, wrap the block of content you want the srcset attribute applied to img tags.
 ```
  {exp:channel:entries 
  	channel="blog" 
  	url_title="{segment_3}"
  	disable="pagination"}
   <article>
- {exp:manners:srcset_bulk
+ {exp:manners:srcset_wrap
 	directory_name="Source Set"
 	short_names="phone|tablet|desktop|hdef"
 	break_lines="y"}
 	{custom_field}
-	{/exp:manners:srcset_bulk}
+	{/exp:manners:srcset_wrap}
  </article>
  {exp:channel:entries}
 
@@ -46,7 +46,7 @@ Add srcset to an img tag in a template outputting an image file from a custom fi
 ##Usage: Single Tags
 
 ###{exp:manners:srcset}
-Return a srcset string of a file's URL and width via the Consrain or Crop widths in an upload directory.
+Add a srcset string of file manipulations to img tags wrapped in this tag.
 
 
 ####Parameters
@@ -57,9 +57,9 @@ Return a srcset string of a file's URL and width via the Consrain or Crop widths
 | short_names | No	| Pipe delimited list of short names of file manipulations <br>to include in the returned srcset |  |	|
 | break_lines | No	| Break returned srcset string into lines? | y | y, n	|
 
-#####Examples
+#####Example
 
-Add srcset to an img tag in a template outputting an image file from a custom field.
+Add srcset to an img tag in a template.
 
 * In your template HTML, wrap an img tag in the tag pair for a custom field you uploaded an image to.
 * Set the default file manipulation in the src attribute.
