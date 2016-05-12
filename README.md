@@ -8,7 +8,7 @@ Tools for using ExpressionEngine image file manipulations with responsive images
 Add srcset string of image file manipulations to img tags wrapped in this tag pair.
 
 <figure>
-	<img src="//panchesco.com/media/image-manipulations.png" alt="Screenshot of the File Manager /Edit Upload area">
+	<img src="http://panchesco.com/media/image-manipulations.png" alt="Screenshot of the File Manager /Edit Upload area">
 	<figcaption><p><em>File manipulations are passed to the srcset attributes for images in your templates.</em></p></figcaption>
 </figure>
 
