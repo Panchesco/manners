@@ -15,7 +15,7 @@
  
 	 $plugin_info = array(
 	    'pi_name'         => 'Manners',
-	    'pi_version'      => '1.2.0',
+	    'pi_version'      => '1.2.1',
 	    'pi_author'       => 'Richard Whitmer',
 	    'pi_author_url'   => 'https://github.com/panchesco/manners',
 	    'pi_description'  => 'Tools for using ExpressionEngine image file manipulations with responsive images in the templates.',
