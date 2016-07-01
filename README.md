@@ -28,6 +28,7 @@ Add srcset string of image image manipulations to img tags wrapped in this tag p
 | directory_name | See notes | Name of directory to look for image manipulations in | | |
 | short_names | No	| Pipe delimited list of short names of image manipulations <br>to include in the returned srcset |  |	|
 | break_lines | No	| Break returned srcset string into lines? | y | y, n	|
+| extra | No	| Any extra text to add to img tag |  | |
 
 ###Notes
 

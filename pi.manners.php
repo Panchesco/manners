@@ -8,7 +8,7 @@
  * @copyright		Copyright (c) 2016, Richard Whitmer
  * @link 			https://github.com/panchesco/manners
  * @license 		MIT
- * @version 		1.2.0
+ * @version 		1.2.1
  * @filesource		manners/pi.manners.php
  */
  
@@ -147,6 +147,7 @@
 				
 				$directory_name	= ee()->TMPL->fetch_param('directory_name');
 				$directory_id		= ee()->TMPL->fetch_param('directory_id');
+				$extra			= ee()->TMPL->fetch_param('extra');
 				
 				$str = '';
 				$img_lines = array();
@@ -233,7 +234,13 @@
 							}
 							
 							// Now add the srcset string to the img tag.
-							$lines[$key] = str_replace('<img ','<img srcset="' . $srcset . '" ',$lines[$key]);
+							
+							if($extra) 
+							{
+								$lines[$key] = str_replace('<img ','<img srcset="' . $srcset . '" ' . $extra . ' ',$lines[$key]);
+							} else {
+								$lines[$key] = str_replace('<img ','<img srcset="' . $srcset . '" ',$lines[$key]);
+							}
 
 						}
 	
