@@ -1,6 +1,5 @@
 <?php
-
-/**
+	/**
  * Manners
  *
  * @package		Manners
@@ -8,308 +7,246 @@
  * @copyright		Copyright (c) 2016, Richard Whitmer
  * @link 			https://github.com/panchesco/manners
  * @license 		MIT
- * @version 		1.2.1
+ * @version 		1.3.0
  * @filesource		manners/pi.manners.php
- */
+ */ 	 
  
- 
-	 $plugin_info = array(
+ $plugin_info = array(
 	    'pi_name'         => 'Manners',
-	    'pi_version'      => '1.2.1',
+	    'pi_version'      => '1.3.0',
 	    'pi_author'       => 'Richard Whitmer',
 	    'pi_author_url'   => 'https://github.com/panchesco/manners',
 	    'pi_description'  => 'Tools for using ExpressionEngine image file manipulations with responsive images in the templates.',
 	    'pi_usage'        => Manners::usage()
 	);
 
- 
-	class Manners {
-		
-		var $short_names	= array();
-		
-		function __construct(){
-			
-			$this->short_names = explode("|",ee()->TMPL->fetch_param('short_names'));
-			 
-			 // Break lines in returned srcset?
-			 $break_lines	= ee()->TMPL->fetch_param('break_lines','y');
-			 $this->break_lines	= str_ireplace(array('yes','y','on','true'),'y',$break_lines);
-		}
-		
-		//-----------------------------------------------------------------------------
-		
-		/**
+    class Manners {
+        var $short_names= array();
+        function __construct(){
+            $this->short_names = explode("|",ee()->TMPL->fetch_param('short_names'));
+            // Break lines in returned srcset?
+			$break_lines= ee()->TMPL->fetch_param('break_lines','y');
+            $this->break_lines= str_ireplace(array('yes','y','on','true'),'y',$break_lines);
+        }
+
+        //-----------------------------------------------------------------------------
+        /**
 		 * Return srcset string for an image file.
 		 * @access public
 		 * @return string
-		 */
-		 public function srcset()
-		 {
-			 $srcset 			= '';
-			 $file_id			= ee()->TMPL->fetch_param('file_id');
+		 */ public
+        function srcset() {
+            $srcset = '';
+            $file_id= ee()->TMPL->fetch_param('file_id');
+            $rows = $this->srcset_array($file_id);
+            
+            if($this->break_lines=='y'){
+                $srcset = implode(", \n",$rows);
+            } else {
+                $srcset = implode(", ",$rows);
+            }
 
-			$rows = $this->srcset_array($file_id);
-			
-			if($this->break_lines=='y')
-			{
-				$srcset = implode(", \n",$rows);
-			} else {
-				$srcset = implode(", ",$rows);
-			}
+            return $srcset;
+        }
 
-			 return $srcset;
-		 }
-		  
-		//-----------------------------------------------------------------------------
-		  
-		/**
+        //-----------------------------------------------------------------------------
+        /**
 		 * Return array of srcset strings for a file.
 		 * @param $file_id integer
 		 * @return array
 		 *
-		*/
-		private function srcset_array($file_id) 
-		{
-			$data = array();
-			
-			$rows = $this->file_manipulations($file_id);
-			
-			foreach($rows as $key => $row)
-			{
-				$data[] = $row->url . ' ' . $row->width . 'w';
-			}
-			
-			return $data;
-		}
-				
-		//-----------------------------------------------------------------------------
+		*/private
+        function srcset_array($file_id) {
+            $data = array();
+            $rows = $this->file_manipulations($file_id);
+            foreach($rows as $key => $row){
+                $data[] = $row->url . ' ' . $row->width . 'w';
+            }
 
-		  /** 
+            return $data;
+        }
+
+        //-----------------------------------------------------------------------------
+        /** 
 		   * Return an array of image manipulations for a file.
 		   * @param $file_id integer
 		   * @return array
-		   */
-		  private function file_manipulations($file_id)
-		  {
-			  $data = array();
+		   */  private
+        function file_manipulations($file_id)  {
+            $data = array();
+            $sel[]= 'files.file_id';
+            $sel[]= 'files.file_name';
+            $sel[]= 'files.upload_location_id';
+            $sel[]= 'upload_prefs.url';
+            $sel[]= 'upload_prefs.server_path';
+            $sel[]= 'file_dimensions.short_name';
+            $sel[]= 'file_dimensions.width';
+            ee()->db->select($sel);
+            ee()->db->join('upload_prefs','upload_prefs.id=files.upload_location_id','left');
+            ee()->db->join('file_dimensions','file_dimensions.upload_location_id=files.upload_location_id','left');
+            ee()->db->where('files.file_id',$file_id);
+            ee()->db->where_in('file_dimensions.short_name',$this->short_names);
+            ee()->db->order_by('file_dimensions.width','asc');
+            $query = ee()->db->get('files');
+            $rows = $query->result();
+            // Set each manipulations url.
+            foreach($rows as $key => $row) {
+                // Account for {base_url} and {base_path} config vars.
+                $rows[$key]->url = str_replace("{base_url}",parse_config_variables("{base_url}"), $rows[$key]->url);
+                $rows[$key]->server_path = str_replace("{base_path}",parse_config_variables("{base_path}"), $rows[$key]->server_path);
+                $rows[$key]->url = $row->url . '_' . $row->short_name . '/' . $row->file_name;
+                $rows[$key]->server_path = $row->server_path . '_' . $row->short_name . '/' . $row->file_name;
+                $rows[$key]->width= '';
+                $rows[$key]->height= '';
+                // Check that the file actually exists and set the width and height values from it.
+                
+                if(file_exists($rows[$key]->server_path)){
+                    list($rows[$key]->width,$rows[$key]->height) = getimagesize($rows[$key]->server_path);
+                } else {
+                    // If it doesn't exist, remove it from the array.
+                    unset($rows[$key]);
+                }
 
-			  $sel[]	= 'files.file_id';
-			  $sel[]	= 'files.file_name';
-			  $sel[]	= 'files.upload_location_id';
-			  $sel[]	= 'upload_prefs.url';
-			  $sel[]	= 'upload_prefs.server_path';
-			  $sel[]	= 'file_dimensions.short_name';
-			  $sel[]	= 'file_dimensions.width';
-			  
-			 ee()->db->select($sel); 
-			 ee()->db->join('upload_prefs','upload_prefs.id=files.upload_location_id','left');
-			 ee()->db->join('file_dimensions','file_dimensions.upload_location_id=files.upload_location_id','left');
-			 ee()->db->where('files.file_id',$file_id);
-			 ee()->db->where_in('file_dimensions.short_name',$this->short_names);
-			 ee()->db->order_by('file_dimensions.width','asc');
-			 $query = ee()->db->get('files');
-			 
-			 $rows = $query->result();
-			 
-			 // Set each manipulations url.
-			 
-			 foreach($rows as $key => $row)
-			 {
-				$rows[$key]->url = $row->url . '_' . $row->short_name . '/' . $row->file_name;
-				$rows[$key]->server_path = $row->server_path . '_' . $row->short_name . '/' . $row->file_name;
-				$rows[$key]->width	= '';
-				$rows[$key]->height	= '';
-				
-				// Check that the file actually exists and set the width and height values from it.
-				
-				if(file_exists($rows[$key]->server_path))
-				{
-					list($rows[$key]->width,$rows[$key]->height) = getimagesize($rows[$key]->server_path);
-				} else {
-					
-				// If it doesn't exist, remove it from the array.
-					unset($rows[$key]);
-				}
-				
-			 }
-			 
-			 return $rows;
-		  }
-		  
-		 //-----------------------------------------------------------------------------
-		 
-			/**
+            }
+
+            return $rows;
+        }
+
+        //-----------------------------------------------------------------------------
+        /**
 			 * 
 			 *
-			*/
-			public function srcset_wrap() 
-			{
-				
-				$directory_name	= ee()->TMPL->fetch_param('directory_name');
-				$directory_id		= ee()->TMPL->fetch_param('directory_id');
-				$extra			= ee()->TMPL->fetch_param('extra');
-				
-				$str = '';
-				$img_lines = array();
-				
-				$tagdata = str_replace("\r","\n",ee()->TMPL->tagdata);
-				
-				// Get the upload directory info.
-				
-				if($directory_id)
-				{
-					ee()->db->where('id',$directory_id);
-					
-				} elseif($directory_name){
-					
-					ee()->db->where('name',$directory_name);
-					
-				} else {
-					
-					return $tagdata;
-				}
-				
-				ee()->db->limit(1);
-				$query = ee()->db->get('upload_prefs');
+			*/public
+        function srcset_wrap() {
+            $directory_name= ee()->TMPL->fetch_param('directory_name');
+            $directory_id= ee()->TMPL->fetch_param('directory_id');
+            $extra= ee()->TMPL->fetch_param('extra');
+            $str = '';
+            $img_lines = array();
+            $tagdata = str_replace("\r","\n",ee()->TMPL->tagdata);
+            // Get the upload directory info.
+            ee()->db->select('id,url');
+            
+            if($directory_id){
+                ee()->db->where('id',$directory_id);
+            }
 
-				// If no directory found, return the tagdata and be done with it.
-				
-				if($query->num_rows()==0)
-				{
-					return $tagdata;
-					
-					} else {
-					
-					$dir = $query->row(); 
-	
-				}
-				
-				
-				// Convert tagdata to array
-				$lines = explode("\n",$tagdata);
-				
-				
-				// Loop through array and create new array of lines with img tags.
-				foreach($lines as $key => $string)
-				{
-					$img = strpos($string, $dir->url);
-					
-					if($img>0)
-					{
-						$img_lines[] = $key;	
-					}
-				}
-				
-				// Now loop through the lines with images.
-				foreach($img_lines as $key)
-				{
-					// Get the src value.
-					
-					$src = $lines[$key];
-					
-					
-					$match = preg_match("/\/[[:alnum:]-_]+\.(png|jpe?g){1}/i", $lines[$key],$result);
-					
-					if(isset($result[0]))
-					{
-						$file_name = trim($result[0],'/');
-						
-						// We have the directory_id and filename.
-						// We can get the file_id.
-						
-						$file_id = $this->file_id($dir->id,$file_name);
-						
-						
-						// Now that we have the file_id, we can get the srcset string 
-						
-						if($file_id)
-						{
-							$srcset = $this->srcset_array($file_id);
-							
-							if($this->break_lines=='y')
-							{
-								$srcset = implode(", \n",$srcset);
-							} else {
-								$srcset = implode(", ",$srcset);
-							}
-							
-							// Now add the srcset string to the img tag.
-							
-							if($extra) 
-							{
-								$lines[$key] = str_replace('<img ','<img srcset="' . $srcset . '" ' . $extra . ' ',$lines[$key]);
-							} else {
-								$lines[$key] = str_replace('<img ','<img srcset="' . $srcset . '" ',$lines[$key]);
-							}
+            elseif($directory_name){
+                ee()->db->where('name',$directory_name);
+            } else {
+                return $tagdata;
+            }
 
-						}
-	
-					}
-					
-				}
-				
-				// Now loop through the lines and rebuild the tagdata.
-				
-				foreach($lines as $row)
-				{
-					$str.= $row . "\n";
-				}
-				
-				return $str;	
-			}
-				
-			//-----------------------------------------------------------------------------
-			
-			
-			/**
+            ee()->db->limit(1);
+            $query = ee()->db->get('upload_prefs');
+            // If no directory found, return the tagdata and be done with it.
+            
+            if($query->num_rows()==0){
+                return $tagdata;
+            } else {
+                $dir = $query->row();
+                // Account for {base_url} in result.
+                $dir->url = str_replace('{base_url}',parse_config_variables("{base_url}"),$dir->url);
+            }
+
+            // Convert tagdata to array
+            $lines = explode("\n",$tagdata);
+            // Loop through array and create new array of lines with img tags.
+            foreach($lines as $key => $string){
+                $img = strpos($string, $dir->url);
+                
+                if($img>0){
+                    $img_lines[] = $key;
+                }
+
+            }
+
+            // Now loop through the lines with images.
+            foreach($img_lines as $key){
+                // Get the src value.
+                $src = $lines[$key];
+                $match = preg_match("/\/[[:alnum:]-_]+\.(gif|png|jpe?g){1}/i", $lines[$key],$result);
+                
+                if(isset($result[0])){
+                    $file_name = trim($result[0],'/');
+                    // We have the directory_id and filename.
+					// We can get the file_id.
+                    $file_id = $this->file_id($dir->id,$file_name);
+                    // Now that we have the file_id, we can get the srcset string 
+                    
+                    if($file_id){
+                        $srcset = $this->srcset_array($file_id);
+                        
+                        if($this->break_lines=='y'){
+                            $srcset = implode(", \n",$srcset);
+                        } else {
+                            $srcset = implode(", ",$srcset);
+                        }
+
+                        // Now add the srcset string to the img tag.
+                        
+                        if($extra) {
+                            $lines[$key] = str_replace('<img ','<img srcset="' . $srcset . '" ' . $extra . ' ',$lines[$key]);
+                        } else {
+                            $lines[$key] = str_replace('<img ','<img srcset="' . $srcset . '" ',$lines[$key]);
+                        }
+
+                    }
+
+                }
+
+            }
+
+            // Now loop through the lines and rebuild the tagdata.
+            foreach($lines as $row){
+                $str.= $row . "\n";
+            }
+
+            return $str;
+        }
+
+        //-----------------------------------------------------------------------------
+        /**
 			 * Get the file id.
 			 * @param $directory_id integer
 			 * @param $file_name integer
 			 * @return mixed integer/bool
-			*/
-			private function file_id($directory_id,$file_name) 
-			{
-					ee()->db->select('file_id');
-					ee()->db->where('upload_location_id',$directory_id);
-					ee()->db->where('file_name',$file_name);
-					ee()->db->limit(1);
-					$query = ee()->db->get('files');
-					
-					if($query->num_rows()==0)
-					{
-						return FALSE;
-					} else {
-						return $query->row()->file_id;
-					}
-				
-			}
-				
-			//-----------------------------------------------------------------------------
-			
-			/**
+			*/private
+        function file_id($directory_id,$file_name) {
+            ee()->db->select('file_id');
+            ee()->db->where('upload_location_id',$directory_id);
+            ee()->db->where('file_name',$file_name);
+            ee()->db->limit(1);
+            $query = ee()->db->get('files');
+            
+            if($query->num_rows()==0){
+                return FALSE;
+            } else {
+                return $query->row()->file_id;
+            }
+
+        }
+
+        //-----------------------------------------------------------------------------
+        /**
 			 * Usage
 			 *
 			 * This function describes how the plugin is used.
 			 *
 			 * @access  public
 			 * @return  string
-			 */
-			public static function usage()
-			{
-			    ob_start();  ?>
-			
+			 */public static
+        function usage(){
+            ob_start();
+            ?>
 			Tools for using ExpressionEngine image file 
 			manipulations with responsive images in the templates.
-			
 			https://github.com/panchesco/manners
-			
 			<?php
-			    $buffer = ob_get_contents();
-			    ob_end_clean();
-			
-			    return $buffer;
-			}
-				
-			//-----------------------------------------------------------------------------
+			$buffer = ob_get_contents();
+            ob_end_clean();
+            return $buffer;
+        }
 
-	}
+        //-----------------------------------------------------------------------------
+    }
