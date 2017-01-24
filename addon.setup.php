@@ -8,7 +8,7 @@
  * @copyright      Copyright (c) 2016, Richard Whitmer.
  * @link           https://github.com/panchesco/manners
  * @license        MIT
- * @version        1.3.0
+ * @version        1.3.1
  * @filesource     manners/addon.setup.php
  */
 
@@ -18,6 +18,6 @@ return array(
       'author_url'  => 'https://github.com/panchesco',
       'name'        => 'Manners',
       'description' => 'Tools for using ExpressionEngine image file manipulations with responsive images in the templates.',
-      'version'     => '1.3.0',
+      'version'     => '1.3.1',
       'namespace'   => '\Panchesco\Addons\Manners',
 );
